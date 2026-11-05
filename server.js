@@ -4,54 +4,66 @@ const app = express();
 
 app.use(express.json());
 
-// قاعدة بيانات مخزنة للتحقق من المفاتيح وعداد الـ 100 رسالة
-const keysDb = {};
+// قاعدة بيانات لتخزين المفاتيح العشوائية وعداد الـ 100 رسالة
+const keysDatabase = {};
 
-// مسار لتوليد مفتاح جديد بحد 100 رسالة
+// 1. مسار توليد المفتاح العشوائي للمستخدم بحد 100 رسالة
 app.post('/api/create-key', (req, res) => {
-    const rand = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-    const newKey = `AQ.${rand.toUpperCase()}`;
-    
-    keysDb[newKey] = { count: 0, limit: 100 };
+    const randomStr = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    const randomKey = `AQ.${randomStr.toUpperCase()}`;
 
-    res.json({ success: true, apiKey: newKey, remaining: 100 });
+    keysDatabase[randomKey] = {
+        requestsCount: 0,
+        maxLimit: 100
+    };
+
+    res.json({
+        success: true,
+        apiKey: randomKey,
+        limit: 100
+    });
 });
 
-// مسار معالجة الطلبات وإرسالها لـ Gemalot
+// 2. مسار معالجة الطلبات وجلب الردود من Gemalot Normal
 app.post('/api/generate', async (req, res) => {
-    const auth = req.headers['authorization'];
-    if(!auth) return res.status(401).json({ error: "مفتاح API مفقود" });
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({ error: "مفتاح API مفقود" });
 
-    const key = auth.replace('Bearer ', '').trim();
+    const userKey = authHeader.replace('Bearer ', '').trim();
 
-    if(!keysDb[key]) {
+    // التحقق من وجود المفتاح العشوائي
+    if (!keysDatabase[userKey]) {
         return res.status(403).json({ error: "مفتاح API غير صالح" });
     }
 
-    if(keysDb[key].count >= keysDb[key].limit) {
-        return res.status(429).json({ error: "لقد استنفدت الحد الأقصى (100 رسالة) لهذا المفتاح." });
+    // التحقق من استهلاك الـ 100 رسالة
+    if (keysDatabase[userKey].requestsCount >= keysDatabase[userKey].maxLimit) {
+        return res.status(429).json({ error: "لقد استنفذت الحد الأقصى (100 رسالة) لهذا المفتاح." });
     }
 
     try {
-        keysDb[key].count++;
+        keysDatabase[userKey].requestsCount++;
 
-        // جلب الرد من نموذج Gemalot الخاص بك على الرابط المطلوب
+        // جلب الرد حصرياً من Gemalot Normal عبر الرابط الخاص بك
         const response = await axios.post('https://Alislamiah.github.io/Gemalot/', {
             prompt: req.body.prompt,
+            model: "Gemalot-Normal",
             project_id: req.headers['x-project-id']
         });
 
         res.json({
-            result: response.data,
-            remaining_requests: keysDb[key].limit - keysDb[key].count
+            status: "success",
+            model: "Gemalot Normal",
+            response: response.data,
+            remaining_requests: keysDatabase[userKey].maxLimit - keysDatabase[userKey].requestsCount
         });
 
-    } catch (err) {
-        keysDb[key].count--; // استرجاع العداد عند الخطأ
-        res.status(500).json({ error: "فشل الاتصال بنموذج Gemalot" });
+    } catch (error) {
+        keysDatabase[userKey].requestsCount--; // استرجاع العداد عند الفشل
+        res.status(500).json({ error: "فشل الاتصال بنموذج Gemalot Normal" });
     }
 });
 
 app.listen(3000, () => {
-    console.log("Alislamiah API Backend is running on port 3000");
+    console.log("Alislamiah API (Gemalot Normal) Server running on port 3000");
 });
