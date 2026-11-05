@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alislamiah API - Project Creation</title>
+    <title>Alislamiah API Studio - Gemalot Normal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background-color: #0f172a; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -13,91 +13,71 @@
         .step.active { display: block; }
         label { display: block; margin-bottom: 8px; font-weight: 600; }
         input[type="text"] { width: 100%; padding: 12px; margin-bottom: 20px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
-        input[type="text"]:focus { border-color: #38bdf8; outline: none; }
-        button { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         button:hover { background: #0369a1; }
         .result-box { background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px; word-break: break-all; font-family: monospace; font-size: 0.85rem; color: #38bdf8; }
-        .back-link { display: block; text-align: center; margin-top: 15px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
-        .back-link:hover { color: #fff; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- الخطوة 1: إدخال اسم المشروع -->
+        <!-- الخطوة 1 -->
         <div id="step1" class="step active">
-            <h2>إنشاء مشروع جديد</h2>
-            <label for="projectName">Project Name:</label>
-            <input type="text" id="projectName" placeholder="أدخل اسم المشروع (مثال: MyAIApp)">
+            <h2>إنشاء مشروع Gemalot Normal</h2>
+            <label>Project Name:</label>
+            <input type="text" id="projectName" placeholder="أدخل اسم المشروع">
             <button onclick="goToStep2()">Next</button>
-            <a href="index.html" class="back-link">العودة للرئيسية</a>
         </div>
 
-        <!-- الخطوة 2: عرض Project ID وتسمية مفتاح API -->
+        <!-- الخطوة 2 -->
         <div id="step2" class="step">
-            <h2>إعداد مفتاح API</h2>
-            <label>Project ID (اسم المشروع + رموز عشوائية):</label>
+            <h2>تسمية مفتاح API</h2>
+            <label>Project ID:</label>
             <div class="result-box" id="displayProjectId"></div>
-
-            <label for="apiKeyName">Name your API Key:</label>
-            <input type="text" id="apiKeyName" placeholder="أدخل اسم المفتاح (مثال: Production Key)">
-            
-            <button onclick="generateApiKey()">إنشاء المفتاح وكود الاستدعاء</button>
+            <label>Name your API Key:</label>
+            <input type="text" id="apiKeyName" placeholder="أدخل اسم المفتاح">
+            <button onclick="generateUserKey()">توليد المفتاح العشوائي</button>
         </div>
 
-        <!-- الخطوة 3: عرض المفتاح وكود الاستدعاء الموجه لـ Gemalot -->
+        <!-- الخطوة 3 -->
         <div id="step3" class="step">
-            <h2>تم إنشاء المفتاح بنجاح</h2>
-            
-            <label>مفتاح Alislamiah API الخاص بك (بحد 100 رسالة):</label>
-            <div class="result-box" id="finalApiKey"></div>
-
-            <label>كود التثبيت والربط (Gemalot Normal):</label>
+            <h2>تم إنشاء المفتاح (حد 100 رسالة)</h2>
+            <label>مفتاحك العشوائي:</label>
+            <div class="result-box" id="finalUserKey"></div>
+            <label>كود التثبيت (Gemalot Normal):</label>
             <div class="result-box" id="installCode" style="font-size: 0.75rem; color: #cbd5e1;"></div>
-
             <button onclick="location.reload()">إنشاء مشروع جديد</button>
         </div>
     </div>
 
     <script>
-        let generatedProjectId = "";
+        let projId = "";
 
         function goToStep2() {
-            const nameInput = document.getElementById('projectName').value.trim();
-            if (!nameInput) {
-                alert('الرجاء إدخال اسم المشروع أولاً!');
-                return;
-            }
-
-            // توليد رموز عشوائية أقصاها 6 أرقام
-            const randomDigits = Math.floor(100000 + Math.random() * 900000);
-            generatedProjectId = `${nameInput}-${randomDigits}`;
-
-            document.getElementById('displayProjectId').innerText = generatedProjectId;
-
-            // الانتقال للخطوة الثانية
+            const name = document.getElementById('projectName').value.trim();
+            if(!name) return alert('الرجاء إدخال اسم المشروع');
+            const randNum = Math.floor(100000 + Math.random() * 900000);
+            projId = `${name}-${randNum}`;
+            document.getElementById('displayProjectId').innerText = projId;
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
         }
 
-        function generateApiKey() {
-            const keyName = document.getElementById('apiKeyName').value.trim();
-            if (!keyName) {
-                alert('الرجاء تسمية مفتاح الـ API!');
-                return;
-            }
+        function generateUserKey() {
+            const kName = document.getElementById('apiKeyName').value.trim();
+            if(!kName) return alert('الرجاء تسمية المفتاح');
 
-            // توليد مفتاح عشوائي يحاكي شكل المفاتيح المطلوبة
-            const randomString = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-            const alislamiahKey = `AQ.${randomString.toUpperCase()}`;
+            // توليد مفتاح عشوائي للمستخدم
+            const randStr = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+            const userKey = `AQ.${randStr.toUpperCase()}`;
 
-            document.getElementById('finalApiKey').innerText = alislamiahKey;
+            document.getElementById('finalUserKey').innerText = userKey;
 
-            // كود الربط الذي يوجه الردود حصرياً إلى نموذج Gemalot Normal عبر الرابط الخاص بك
-            const integrationCode = `
-// Alislamiah API Integration (Gemalot Normal Model)
-const ALISLAMIAH_API_KEY = "${alislamiahKey}";
-const PROJECT_ID = "${generatedProjectId}";
+            // كود الاستدعاء الموجه حصرياً لنموذج Gemalot Normal على الرابط المطلوب
+            const code = `
+// Alislamiah API - Gemalot Normal Model
+const USER_API_KEY = "${userKey}";
+const PROJECT_ID = "${projId}";
 const GEMALOT_ENDPOINT = "https://Alislamiah.github.io/Gemalot/";
 
 async function callGemalotNormal(promptText) {
@@ -105,8 +85,9 @@ async function callGemalotNormal(promptText) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + ALISLAMIAH_API_KEY,
-            'X-Project-ID': PROJECT_ID
+            'Authorization': 'Bearer ' + USER_API_KEY,
+            'X-Project-ID': PROJECT_ID,
+            'X-Model': 'Gemalot-Normal'
         },
         body: JSON.stringify({ prompt: promptText })
     });
@@ -114,9 +95,7 @@ async function callGemalotNormal(promptText) {
 }
             `.trim();
 
-            document.getElementById('installCode').innerText = integrationCode;
-
-            // الانتقال للخطوة الثالثة والأخيرة
+            document.getElementById('installCode').innerText = code;
             document.getElementById('step2').classList.remove('active');
             document.getElementById('step3').classList.add('active');
         }
